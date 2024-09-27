@@ -4,77 +4,54 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Avant-Garde Art Landing Page</title>
+  <title>Interactive Abstract Drawing</title>
   <style>
     body {
       margin: 0;
       overflow: hidden;
-      background: black;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      font-family: 'Arial', sans-serif;
+      background: black;
     }
 
-    .canvas-container {
+    canvas {
       position: absolute;
-      width: 100%;
-      height: 100%;
-      display: flex;
-      justify-content: center;
-      align-items: center;
+      top: 0;
+      left: 0;
     }
 
-    .button {
+    .clear-btn {
       position: absolute;
-      top: 80%;
-      padding: 15px 30px;
+      top: 20px;
+      right: 20px;
+      padding: 10px 20px;
       background-color: white;
-      color: black;
       border: none;
-      border-radius: 50px;
-      font-size: 1.5rem;
+      font-size: 16px;
+      border-radius: 8px;
       cursor: pointer;
-      transition: opacity 0.5s ease;
+      z-index: 10;
     }
 
-    @keyframes draw {
-      from {
-        stroke-dasharray: 0, 200;
-      }
-      to {
-        stroke-dasharray: 200, 0;
-      }
-    }
-
-    @keyframes fadeOut {
-      0% {
-        opacity: 1;
-      }
-      90% {
-        opacity: 0.3;
-      }
-      100% {
-        opacity: 0;
-      }
+    .clear-btn:hover {
+      background-color: #ddd;
     }
   </style>
 </head>
 <body>
 
-  <div class="canvas-container">
-    <button class="button" id="revealBtn">Unleash Art!</button>
-  </div>
-
   <canvas id="artCanvas"></canvas>
+  <button class="clear-btn" id="clearBtn">Clear</button>
 
   <script>
     const canvas = document.getElementById('artCanvas');
     const ctx = canvas.getContext('2d');
-    const revealBtn = document.getElementById('revealBtn');
+    const clearBtn = document.getElementById('clearBtn');
     
     let width, height;
+
     function resizeCanvas() {
       width = canvas.width = window.innerWidth;
       height = canvas.height = window.innerHeight;
@@ -86,52 +63,59 @@
       return Math.floor(Math.random() * (max - min)) + min;
     }
 
-    function drawAbstractShapes() {
-      const shapes = getRandomInt(10, 20);
-      for (let i = 0; i < shapes; i++) {
-        ctx.beginPath();
-        const x1 = getRandomInt(0, width);
-        const y1 = getRandomInt(0, height);
-        const x2 = getRandomInt(0, width);
-        const y2 = getRandomInt(0, height);
-        const lineWidth = getRandomInt(1, 10);
+    function drawRandomShape(x, y) {
+      const shapeType = getRandomInt(0, 3);
+      const size = getRandomInt(20, 100);
+      const lineWidth = getRandomInt(2, 8);
+      const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
 
-        ctx.moveTo(x1, y1);
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = color;
+
+      switch (shapeType) {
+        case 0: // Random Circle
+          ctx.beginPath();
+          ctx.arc(x, y, size, 0, Math.PI * 2);
+          ctx.stroke();
+          break;
+        case 1: // Random Square
+          ctx.beginPath();
+          ctx.rect(x - size / 2, y - size / 2, size, size);
+          ctx.stroke();
+          break;
+        case 2: // Random Triangle
+          ctx.beginPath();
+          ctx.moveTo(x, y - size);
+          ctx.lineTo(x + size, y + size);
+          ctx.lineTo(x - size, y + size);
+          ctx.closePath();
+          ctx.stroke();
+          break;
+      }
+    }
+
+    function drawTessellation(x, y) {
+      const size = getRandomInt(30, 60);
+      const color = `hsl(${Math.random() * 360}, 100%, 50%)`;
+      const lineWidth = getRandomInt(1, 5);
+      
+      ctx.lineWidth = lineWidth;
+      ctx.strokeStyle = color;
+      
+      for (let i = 0; i < 6; i++) {
+        ctx.beginPath();
+        const angle = Math.PI / 3 * i;
+        const x2 = x + size * Math.cos(angle);
+        const y2 = y + size * Math.sin(angle);
+        ctx.moveTo(x, y);
         ctx.lineTo(x2, y2);
-        ctx.lineWidth = lineWidth;
-        ctx.strokeStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
-        ctx.stroke();
-      }
-
-      const circles = getRandomInt(5, 10);
-      for (let i = 0; i < circles; i++) {
-        ctx.beginPath();
-        const x = getRandomInt(0, width);
-        const y = getRandomInt(0, height);
-        const radius = getRandomInt(30, 100);
-
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.lineWidth = getRandomInt(1, 8);
-        ctx.strokeStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
         ctx.stroke();
       }
     }
 
-    function clearCanvas() {
-      ctx.clearRect(0, 0, width, height);
-    }
+    let drawing = false;
+    let lastX = 0;
+    let lastY = 0;
 
-    revealBtn.addEventListener('click', function() {
-      clearCanvas();
-      drawAbstractShapes();
-      revealBtn.style.opacity = 0;
-
-      setTimeout(() => {
-        clearCanvas();
-        revealBtn.style.opacity = 1;
-      }, 3000); // Resets after 3 seconds
-    });
-  </script>
-
-</body>
-</html>
+    function startDrawing(event) {
+      drawing =
