@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Random Shape Generator</title>
+<title>Random Shape Generator with Movement</title>
 <style>
         body {
             position: relative;
@@ -15,12 +15,11 @@
         .random-shape {
             position: absolute;
             opacity: 0.7;
+            transition: transform 1s linear;
         }
  
-        #generate-btn {
+        #generate-btn, #clear-btn, #move-btn {
             position: fixed;
-            top: 20px;
-            left: 20px;
             padding: 10px 20px;
             background-color: #3498db;
             color: white;
@@ -28,16 +27,49 @@
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            z-index: 10;
+        }
+ 
+        #generate-btn {
+            top: 20px;
+            left: 20px;
+        }
+ 
+        #clear-btn {
+            top: 20px;
+            left: 180px;
+        }
+ 
+        #move-btn {
+            top: 20px;
+            left: 340px;
         }
 </style>
 </head>
 <body>
  
     <button id="generate-btn">Generate Random Shape</button>
+<button id="clear-btn">Clear All Shapes</button>
+<button id="move-btn">Start Moving Shapes</button>
  
     <script>
+        let moveShapesInterval = null;
+        let shapes = [];
+        let isMoving = false;
+ 
+        // Event listener for generating a random shape
         document.getElementById('generate-btn').addEventListener('click', function() {
             generateRandomShape();
+        });
+ 
+        // Event listener for clearing all shapes
+        document.getElementById('clear-btn').addEventListener('click', function() {
+            clearAllShapes();
+        });
+ 
+        // Event listener for toggling shape movement
+        document.getElementById('move-btn').addEventListener('click', function() {
+            toggleShapeMovement();
         });
  
         function generateRandomShape() {
@@ -65,8 +97,49 @@
             shape.style.left = xPos + 'px';
             shape.style.top = yPos + 'px';
  
-            // Append the shape to the body
+            // Append the shape to the body and keep track of it
             document.body.appendChild(shape);
+            shapes.push(shape);
+        }
+ 
+        function clearAllShapes() {
+            shapes.forEach(shape => {
+                shape.remove();
+            });
+            shapes = []; // Reset the shapes array
+        }
+ 
+        function toggleShapeMovement() {
+            if (isMoving) {
+                stopMovingShapes();
+            } else {
+                startMovingShapes();
+            }
+        }
+ 
+        function startMovingShapes() {
+            isMoving = true;
+            document.getElementById('move-btn').innerText = 'Stop Moving Shapes';
+ 
+            moveShapesInterval = setInterval(() => {
+                shapes.forEach(shape => {
+                    const randomX = (Math.random() - 0.5) * 10; // Random X movement
+                    const randomY = (Math.random() - 0.5) * 10; // Random Y movement
+ 
+                    const currentX = parseFloat(shape.style.left);
+                    const currentY = parseFloat(shape.style.top);
+ 
+                    // Update the position of each shape
+                    shape.style.left = (currentX + randomX) + 'px';
+                    shape.style.top = (currentY + randomY) + 'px';
+                });
+            }, 100); // Move every 100ms
+        }
+ 
+        function stopMovingShapes() {
+            isMoving = false;
+            document.getElementById('move-btn').innerText = 'Start Moving Shapes';
+            clearInterval(moveShapesInterval);
         }
 </script>
  
