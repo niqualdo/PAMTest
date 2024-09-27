@@ -4,85 +4,132 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="X-UA-Compatible" content="ie=edge">
-  <title>Cool Landing Page</title>
+  <title>Avant-Garde Art Landing Page</title>
   <style>
     body {
+      margin: 0;
+      overflow: hidden;
+      background: black;
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
-      background: linear-gradient(135deg, #ffcc70, #ff6673, #ac68ff);
-      margin: 0;
       font-family: 'Arial', sans-serif;
-      overflow: hidden;
     }
 
-    h1 {
-      font-size: 3rem;
-      color: white;
-      margin-bottom: 20px;
-      text-align: center;
+    .canvas-container {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
     }
 
     .button {
+      position: absolute;
+      top: 80%;
       padding: 15px 30px;
-      background-color: #fff;
-      color: #ff6673;
+      background-color: white;
+      color: black;
       border: none;
-      border-radius: 10px;
+      border-radius: 50px;
       font-size: 1.5rem;
       cursor: pointer;
-      transition: background-color 0.3s ease;
+      transition: opacity 0.5s ease;
     }
 
-    .button:hover {
-      background-color: #ff6673;
-      color: #fff;
-    }
-
-    .hidden-message {
-      display: none;
-      font-size: 2rem;
-      color: white;
-      animation: bounce 1s ease-in-out infinite;
-      text-align: center;
-    }
-
-    @keyframes bounce {
-      0%, 20%, 50%, 80%, 100% {
-        transform: translateY(0);
+    @keyframes draw {
+      from {
+        stroke-dasharray: 0, 200;
       }
-      40% {
-        transform: translateY(-30px);
-      }
-      60% {
-        transform: translateY(-15px);
+      to {
+        stroke-dasharray: 200, 0;
       }
     }
 
-    @media (hover: none) {
-      .button:active {
-        background-color: #ff6673;
-        color: #fff;
+    @keyframes fadeOut {
+      0% {
+        opacity: 1;
+      }
+      90% {
+        opacity: 0.3;
+      }
+      100% {
+        opacity: 0;
       }
     }
   </style>
 </head>
 <body>
 
-  <div class="container">
-    <h1>Tap to reveal something cool!</h1>
-    <button class="button" id="revealBtn">Tap Me!</button>
-    <div class="hidden-message" id="message">✨ Surprise! You're Awesome! ✨</div>
+  <div class="canvas-container">
+    <button class="button" id="revealBtn">Unleash Art!</button>
   </div>
 
+  <canvas id="artCanvas"></canvas>
+
   <script>
+    const canvas = document.getElementById('artCanvas');
+    const ctx = canvas.getContext('2d');
     const revealBtn = document.getElementById('revealBtn');
-    const message = document.getElementById('message');
+    
+    let width, height;
+    function resizeCanvas() {
+      width = canvas.width = window.innerWidth;
+      height = canvas.height = window.innerHeight;
+    }
+    window.addEventListener('resize', resizeCanvas);
+    resizeCanvas();
+
+    function getRandomInt(min, max) {
+      return Math.floor(Math.random() * (max - min)) + min;
+    }
+
+    function drawAbstractShapes() {
+      const shapes = getRandomInt(10, 20);
+      for (let i = 0; i < shapes; i++) {
+        ctx.beginPath();
+        const x1 = getRandomInt(0, width);
+        const y1 = getRandomInt(0, height);
+        const x2 = getRandomInt(0, width);
+        const y2 = getRandomInt(0, height);
+        const lineWidth = getRandomInt(1, 10);
+
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.lineWidth = lineWidth;
+        ctx.strokeStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        ctx.stroke();
+      }
+
+      const circles = getRandomInt(5, 10);
+      for (let i = 0; i < circles; i++) {
+        ctx.beginPath();
+        const x = getRandomInt(0, width);
+        const y = getRandomInt(0, height);
+        const radius = getRandomInt(30, 100);
+
+        ctx.arc(x, y, radius, 0, Math.PI * 2);
+        ctx.lineWidth = getRandomInt(1, 8);
+        ctx.strokeStyle = `hsl(${Math.random() * 360}, 100%, 50%)`;
+        ctx.stroke();
+      }
+    }
+
+    function clearCanvas() {
+      ctx.clearRect(0, 0, width, height);
+    }
 
     revealBtn.addEventListener('click', function() {
-      message.style.display = 'block';
-      revealBtn.style.display = 'none';
+      clearCanvas();
+      drawAbstractShapes();
+      revealBtn.style.opacity = 0;
+
+      setTimeout(() => {
+        clearCanvas();
+        revealBtn.style.opacity = 1;
+      }, 3000); // Resets after 3 seconds
     });
   </script>
 
