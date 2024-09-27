@@ -1,114 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Random Shape Generator with Movement</title>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Enhanced Random Shape Generator</title>
+    <style>
         body {
             position: relative;
             height: 100vh;
             margin: 0;
             overflow: hidden;
+            background-color: #f0f0f0;
         }
- 
+
         .random-shape {
             position: absolute;
             opacity: 0.7;
-            transition: transform 1s linear;
+            transition: transform 0.5s linear;
         }
- 
-        #generate-btn, #clear-btn, #move-btn {
+
+        button {
             position: fixed;
+            bottom: 20px;
             padding: 10px 20px;
-            background-color: #3498db;
-            color: white;
-            border: none;
+            border: 2px solid #333;
             border-radius: 5px;
             cursor: pointer;
             font-size: 16px;
+            color: white;
             z-index: 10;
         }
- 
+
         #generate-btn {
-            top: 20px;
+            background-color: #3498db;
             left: 20px;
         }
- 
+
         #clear-btn {
-            top: 20px;
-            left: 180px;
+            background-color: #e74c3c;
+            left: 200px;
         }
- 
+
         #move-btn {
-            top: 20px;
-            left: 340px;
+            background-color: #2ecc71;
+            left: 380px;
         }
-</style>
+
+        #grow-shrink-btn {
+            background-color: #f39c12;
+            left: 560px;
+        }
+    </style>
 </head>
 <body>
- 
+
     <button id="generate-btn">Generate Random Shape</button>
-<button id="clear-btn">Clear All Shapes</button>
-<button id="move-btn">Start Moving Shapes</button>
- 
+    <button id="clear-btn">Clear All Shapes</button>
+    <button id="move-btn">Start Moving Shapes</button>
+    <button id="grow-shrink-btn">Grow/Shrink Shapes</button>
+
     <script>
         let moveShapesInterval = null;
+        let growShrinkInterval = null;
         let shapes = [];
         let isMoving = false;
- 
+        let isGrowingShrinking = false;
+        let velocities = [];
+
         // Event listener for generating a random shape
         document.getElementById('generate-btn').addEventListener('click', function() {
             generateRandomShape();
         });
- 
+
         // Event listener for clearing all shapes
         document.getElementById('clear-btn').addEventListener('click', function() {
             clearAllShapes();
         });
- 
+
         // Event listener for toggling shape movement
         document.getElementById('move-btn').addEventListener('click', function() {
             toggleShapeMovement();
         });
- 
+
+        // Event listener for toggling grow/shrink effect
+        document.getElementById('grow-shrink-btn').addEventListener('click', function() {
+            toggleGrowShrinkShapes();
+        });
+
         function generateRandomShape() {
             // Create a random shape element
             const shape = document.createElement('div');
             shape.classList.add('random-shape');
- 
+
             // Set random shape dimensions
             const size = Math.floor(Math.random() * 100) + 50;
             shape.style.width = size + 'px';
             shape.style.height = size + 'px';
- 
+
             // Set random background color
             const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
             shape.style.backgroundColor = randomColor;
- 
+
             // Random shape type (circle or square)
             if (Math.random() > 0.5) {
                 shape.style.borderRadius = '50%';
             }
- 
+
             // Set random position
-            const xPos = Math.floor(Math.random() * window.innerWidth);
-            const yPos = Math.floor(Math.random() * window.innerHeight);
+            const xPos = Math.floor(Math.random() * (window.innerWidth - size));
+            const yPos = Math.floor(Math.random() * (window.innerHeight - size - 50)); // To avoid buttons at the bottom
             shape.style.left = xPos + 'px';
             shape.style.top = yPos + 'px';
- 
+
+            // Random velocity for linear movement (positive or negative)
+            const velocityX = (Math.random() * 2 + 1) * (Math.random() > 0.5 ? 1 : -1);
+            const velocityY = (Math.random() * 2 + 1) * (Math.random() > 0.5 ? 1 : -1);
+            velocities.push({ x: velocityX, y: velocityY });
+
             // Append the shape to the body and keep track of it
             document.body.appendChild(shape);
             shapes.push(shape);
         }
- 
+
         function clearAllShapes() {
             shapes.forEach(shape => {
                 shape.remove();
             });
             shapes = []; // Reset the shapes array
+            velocities = []; // Reset velocities
         }
- 
+
         function toggleShapeMovement() {
             if (isMoving) {
                 stopMovingShapes();
@@ -116,32 +137,65 @@
                 startMovingShapes();
             }
         }
- 
+
         function startMovingShapes() {
             isMoving = true;
             document.getElementById('move-btn').innerText = 'Stop Moving Shapes';
- 
+
             moveShapesInterval = setInterval(() => {
-                shapes.forEach(shape => {
-                    const randomX = (Math.random() - 0.5) * 10; // Random X movement
-                    const randomY = (Math.random() - 0.5) * 10; // Random Y movement
- 
+                shapes.forEach((shape, index) => {
                     const currentX = parseFloat(shape.style.left);
                     const currentY = parseFloat(shape.style.top);
- 
+                    const width = shape.offsetWidth;
+                    const height = shape.offsetHeight;
+
+                    // Bounce off the walls
+                    if (currentX + velocities[index].x + width > window.innerWidth || currentX + velocities[index].x < 0) {
+                        velocities[index].x *= -1;
+                    }
+                    if (currentY + velocities[index].y + height > window.innerHeight - 50 || currentY + velocities[index].y < 0) {
+                        velocities[index].y *= -1;
+                    }
+
                     // Update the position of each shape
-                    shape.style.left = (currentX + randomX) + 'px';
-                    shape.style.top = (currentY + randomY) + 'px';
+                    shape.style.left = (currentX + velocities[index].x) + 'px';
+                    shape.style.top = (currentY + velocities[index].y) + 'px';
                 });
-            }, 100); // Move every 100ms
+            }, 20); // Move every 20ms for smooth movement
         }
- 
+
         function stopMovingShapes() {
             isMoving = false;
             document.getElementById('move-btn').innerText = 'Start Moving Shapes';
             clearInterval(moveShapesInterval);
         }
-</script>
- 
+
+        function toggleGrowShrinkShapes() {
+            if (isGrowingShrinking) {
+                stopGrowShrinkShapes();
+            } else {
+                startGrowShrinkShapes();
+            }
+        }
+
+        function startGrowShrinkShapes() {
+            isGrowingShrinking = true;
+            document.getElementById('grow-shrink-btn').innerText = 'Stop Grow/Shrink';
+
+            growShrinkInterval = setInterval(() => {
+                shapes.forEach((shape) => {
+                    const randomScale = Math.random() * 0.5 + 0.75; // Random scale between 0.75 and 1.25
+                    shape.style.transform = `scale(${randomScale})`;
+                });
+            }, 500); // Change size every 500ms
+        }
+
+        function stopGrowShrinkShapes() {
+            isGrowingShrinking = false;
+            document.getElementById('grow-shrink-btn').innerText = 'Grow/Shrink Shapes';
+            clearInterval(growShrinkInterval);
+        }
+    </script>
+
 </body>
 </html>
