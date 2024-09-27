@@ -1,108 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-   <meta charset="UTF-8">
-   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Status Indicator</title>
-   <style>
-       body {
-          font-family: Arial, sans-serif;
-           display: flex;
-          flex-direction: column;
-          align-items: center;
-          justify-content: center;
-           height: 100vh;
-           margin: 0;
-          background-color: #f4f4f4;
-       }
-       .status-board {
-           display: flex;
-          justify-content: space-around;
-           width: 90%;
-           max-width: 800px;
-       }
-       .member {
-          text-align: center;
-           padding: 20px;
-          background-color: #fff;
-          border-radius: 10px;
-          box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-           width: 30%;
-       }
-       .member h2 {
-          margin-bottom: 20px;
-       }
-       .status {
-           padding: 10px;
-           font-size: 18px;
-           border: 2px solid #ccc;
-          border-radius: 5px;
-          user-select: none;
-       }
-      .status.available { color: green; }
-       .status.dnd { color: red; }
-       .status.knock { color: orange; }
-       .status.out { color: gray; }
-       .touch-area {
-          margin-top: 15px;
-           color: #888;
-           font-size: 14px;
-       }
-   </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Random Shape Generator</title>
+<style>
+        body {
+            position: relative;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+        }
+ 
+        .random-shape {
+            position: absolute;
+            opacity: 0.7;
+        }
+ 
+        #generate-btn {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            padding: 10px 20px;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+</style>
 </head>
 <body>
  
-   <div class="status-board">
-       <div class="member" id="geary">
-          <h2>Geary</h2>
-           <div class="status available" id="status-geary">Available</div>
-           <div class="touch-area">Swipe to change status</div>
-       </div>
+    <button id="generate-btn">Generate Random Shape</button>
  
-       <div class="member" id="nick">
-          <h2>Nick</h2>
-           <div class="status available" id="status-nick">Available</div>
-           <div class="touch-area">Swipe to change status</div>
-       </div>
+    <script>
+        document.getElementById('generate-btn').addEventListener('click', function() {
+            generateRandomShape();
+        });
  
-       <div class="member" id="alan">
-          <h2>Alan</h2>
-           <div class="status available" id="status-alan">Available</div>
-           <div class="touch-area">Swipe to change status</div>
-       </div>
-   </div>
+        function generateRandomShape() {
+            // Create a random shape element
+            const shape = document.createElement('div');
+            shape.classList.add('random-shape');
  
-   <script>
-       const statuses = ["Available", "Do Not Disturb", "Please Knock", "Out of Office"];
-       const statusClasses = ["available", "dnd", "knock", "out"];
+            // Set random shape dimensions
+            const size = Math.floor(Math.random() * 100) + 50;
+            shape.style.width = size + 'px';
+            shape.style.height = size + 'px';
  
-       function updateStatus(element, currentStatus) {
-           let currentIndex = statuses.indexOf(currentStatus);
-           let newIndex = (currentIndex + 1) % statuses.length;
-          element.textContent = statuses[newIndex];
-          element.className = `status ${statusClasses[newIndex]}`;
-       }
+            // Set random background color
+            const randomColor = `#${Math.floor(Math.random() * 16777215).toString(16)}`;
+            shape.style.backgroundColor = randomColor;
  
-      document.querySelectorAll('.status').forEach(statusElement => {
-           let touchStartX = 0;
-          statusElement.addEventListener('touchstart', (event) => {
-              touchStartX = event.touches[0].clientX;
-           });
+            // Random shape type (circle or square)
+            if (Math.random() > 0.5) {
+                shape.style.borderRadius = '50%';
+            }
  
-          statusElement.addEventListener('touchend', (event) => {
-               let touchEndX = event.changedTouches[0].clientX;
-               if (touchEndX < touchStartX - 50) {
-                   // Swiped left, update status
-                  updateStatus(statusElement, statusElement.textContent);
-               }
-           });
+            // Set random position
+            const xPos = Math.floor(Math.random() * window.innerWidth);
+            const yPos = Math.floor(Math.random() * window.innerHeight);
+            shape.style.left = xPos + 'px';
+            shape.style.top = yPos + 'px';
  
-          statusElement.addEventListener('click', () => {
-               // Fallback for desktop users
-              updateStatus(statusElement, statusElement.textContent);
-           });
-       });
-   </script>
+            // Append the shape to the body
+            document.body.appendChild(shape);
+        }
+</script>
  
 </body>
 </html>
