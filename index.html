@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Favorite Museum Exhibit Vote</title>
-<style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Favorite Museum Exhibit Vote</title>
+    <style>
         body {
             font-family: Arial, sans-serif;
             display: flex;
@@ -28,6 +28,7 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
+            box-shadow: 3px 3px 5px rgba(0,0,0,0.2);
         }
         .section-button:hover {
             background-color: #45a049;
@@ -48,41 +49,115 @@
         .submit-button:hover {
             background-color: #0b7dda;
         }
-</style>
+        #graph-container {
+            margin-top: 40px;
+            width: 80%;
+            height: 300px;
+        }
+        canvas {
+            width: 100%;
+            height: 100%;
+        }
+        #reset-message {
+            font-size: 16px;
+            color: green;
+            margin-top: 20px;
+        }
+    </style>
 </head>
 <body>
- 
+
     <h1>Vote for Your Favorite Museum Section</h1>
- 
+
     <div>
-<button class="section-button" onclick="vote('Modern Art')">Modern Art</button>
-<button class="section-button" onclick="vote('Fashion Collection')">Fashion Collection</button>
-<button class="section-button" onclick="vote('Sikh Art and History')">Sikh Art and History</button>
-<button class="section-button" onclick="vote('Experimental Art')">Experimental Art</button>
-<button class="section-button" onclick="vote('Miniature Rooms')">Miniature Rooms</button>
-</div>
- 
+        <button class="section-button" onclick="vote('Modern Art')">Modern Art</button>
+        <button class="section-button" onclick="vote('Fashion Collection')">Fashion Collection</button>
+        <button class="section-button" onclick="vote('Sikh Art and History')">Sikh Art and History</button>
+        <button class="section-button" onclick="vote('Experimental Art')">Experimental Art</button>
+        <button class="section-button" onclick="vote('Miniature Rooms')">Miniature Rooms</button>
+    </div>
+
     <div id="vote-confirmation"></div>
- 
+
     <button class="submit-button" onclick="submitVote()">Submit Vote</button>
- 
+
+    <div id="reset-message"></div>
+
+    <div id="graph-container">
+        <canvas id="voteChart"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+        let voteCounts = {
+            'Modern Art': 0,
+            'Fashion Collection': 0,
+            'Sikh Art and History': 0,
+            'Experimental Art': 0,
+            'Miniature Rooms': 0
+        };
         let selectedSection = '';
- 
+        let canVote = true;
+
+        // Chart setup
+        const ctx = document.getElementById('voteChart').getContext('2d');
+        const voteChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: Object.keys(voteCounts),
+                datasets: [{
+                    label: 'Votes',
+                    data: Object.values(voteCounts),
+                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9F40']
+                }]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+
+        // Vote button functionality
         function vote(section) {
-            selectedSection = section;
-            document.getElementById('vote-confirmation').innerHTML = "You selected: " + section;
+            if (canVote) {
+                selectedSection = section;
+                document.getElementById('vote-confirmation').innerHTML = "You selected: " + section;
+            } else {
+                alert('Please wait before voting again.');
+            }
         }
- 
+
+        // Submit vote
         function submitVote() {
             if (selectedSection === '') {
                 alert('Please select a section before submitting.');
-            } else {
-                alert('Thank you for voting for the ' + selectedSection + ' section!');
-                // Here you would send the vote to the server or process it accordingly.
+            } else if (canVote) {
+                voteCounts[selectedSection]++;
+                updateGraph();
+                canVote = false;
+                document.getElementById('reset-message').innerHTML = 'Thank you for voting! The kiosk will reset in 15 seconds.';
+                
+                setTimeout(resetKiosk, 15000);
             }
         }
-</script>
- 
+
+        // Update the graph after voting
+        function updateGraph() {
+            voteChart.data.datasets[0].data = Object.values(voteCounts);
+            voteChart.update();
+        }
+
+        // Reset the kiosk after 15 seconds
+        function resetKiosk() {
+            selectedSection = '';
+            canVote = true;
+            document.getElementById('vote-confirmation').innerHTML = '';
+            document.getElementById('reset-message').innerHTML = 'Kiosk is ready to capture votes.';
+        }
+    </script>
+
 </body>
 </html>
