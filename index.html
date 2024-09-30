@@ -7,16 +7,14 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
+            text-align: center;
             margin: 0;
+            padding: 0;
             background-color: #f0f0f0;
+            overflow: hidden;
         }
         h1 {
-            text-align: center;
+            margin-top: 20px;
         }
         .section-button {
             display: inline-block;
@@ -28,12 +26,11 @@
             border: none;
             border-radius: 5px;
             cursor: pointer;
-            box-shadow: 3px 3px 5px rgba(0,0,0,0.2);
         }
         .section-button:hover {
             background-color: #45a049;
         }
-        #vote-confirmation {
+        #vote-confirmation, #total-votes {
             margin-top: 20px;
             font-size: 18px;
         }
@@ -49,25 +46,40 @@
         .submit-button:hover {
             background-color: #0b7dda;
         }
-        #graph-container {
-            margin-top: 40px;
-            width: 80%;
-            height: 300px;
+        /* Floating background images */
+        .background-image {
+            position: absolute;
+            opacity: 0.1;
+            width: 200px;
+            height: auto;
         }
-        canvas {
-            width: 100%;
-            height: 100%;
+        .image1 {
+            top: 10%;
+            left: 5%;
         }
-        #reset-message {
-            font-size: 16px;
-            color: green;
-            margin-top: 20px;
+        .image2 {
+            top: 30%;
+            right: 10%;
+        }
+        .image3 {
+            bottom: 10%;
+            left: 20%;
+        }
+        .image4 {
+            bottom: 20%;
+            right: 5%;
         }
     </style>
 </head>
 <body>
 
     <h1>Vote for Your Favorite Museum Section</h1>
+
+    <!-- Floating background images -->
+    <img src="modern_art.jpg" class="background-image image1" alt="Modern Art">
+    <img src="fashion_collection.jpg" class="background-image image2" alt="Fashion Collection">
+    <img src="sikh_art.jpg" class="background-image image3" alt="Sikh Art and History">
+    <img src="miniature_rooms.jpg" class="background-image image4" alt="Miniature Rooms">
 
     <div>
         <button class="section-button" onclick="vote('Modern Art')">Modern Art</button>
@@ -78,84 +90,29 @@
     </div>
 
     <div id="vote-confirmation"></div>
+    <div id="total-votes">Total Votes: 0</div>
 
     <button class="submit-button" onclick="submitVote()">Submit Vote</button>
 
-    <div id="reset-message"></div>
-
-    <div id="graph-container">
-        <canvas id="voteChart"></canvas>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        let voteCounts = {
-            'Modern Art': 0,
-            'Fashion Collection': 0,
-            'Sikh Art and History': 0,
-            'Experimental Art': 0,
-            'Miniature Rooms': 0
-        };
         let selectedSection = '';
-        let canVote = true;
+        let totalVotes = 0;
 
-        // Chart setup
-        const ctx = document.getElementById('voteChart').getContext('2d');
-        const voteChart = new Chart(ctx, {
-            type: 'bar',
-            data: {
-                labels: Object.keys(voteCounts),
-                datasets: [{
-                    label: 'Votes',
-                    data: Object.values(voteCounts),
-                    backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9F40']
-                }]
-            },
-            options: {
-                scales: {
-                    y: {
-                        beginAtZero: true
-                    }
-                }
-            }
-        });
-
-        // Vote button functionality
         function vote(section) {
-            if (canVote) {
-                selectedSection = section;
-                document.getElementById('vote-confirmation').innerHTML = "You selected: " + section;
-            } else {
-                alert('Please wait before voting again.');
-            }
+            selectedSection = section;
+            document.getElementById('vote-confirmation').innerHTML = "You selected: " + section;
         }
 
-        // Submit vote
         function submitVote() {
             if (selectedSection === '') {
                 alert('Please select a section before submitting.');
-            } else if (canVote) {
-                voteCounts[selectedSection]++;
-                updateGraph();
-                canVote = false;
-                document.getElementById('reset-message').innerHTML = 'Thank you for voting! The kiosk will reset in 15 seconds.';
-                
-                setTimeout(resetKiosk, 15000);
+            } else {
+                totalVotes++;
+                alert('Thank you for voting for the ' + selectedSection + ' section!');
+                document.getElementById('total-votes').innerHTML = 'Total Votes: ' + totalVotes;
+                selectedSection = ''; // Reset selection
+                document.getElementById('vote-confirmation').innerHTML = '';
             }
-        }
-
-        // Update the graph after voting
-        function updateGraph() {
-            voteChart.data.datasets[0].data = Object.values(voteCounts);
-            voteChart.update();
-        }
-
-        // Reset the kiosk after 15 seconds
-        function resetKiosk() {
-            selectedSection = '';
-            canVote = true;
-            document.getElementById('vote-confirmation').innerHTML = '';
-            document.getElementById('reset-message').innerHTML = 'Kiosk is ready to capture votes.';
         }
     </script>
 
