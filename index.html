@@ -3,116 +3,90 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Favorite Museum Exhibit Vote</title>
+    <title>Paint at Phoenix Art Museum</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
-            text-align: center;
+            font-family: 'Arial', sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
             margin: 0;
-            padding: 0;
-            background-color: #f0f0f0;
-            overflow: hidden;
+            background-color: #f5f5f5;
         }
         h1 {
-            margin-top: 20px;
+            text-align: center;
+            margin-bottom: 10px;
         }
-        .section-button {
-            display: inline-block;
-            margin: 10px;
-            padding: 15px 25px;
+        canvas {
+            border: 3px solid #333;
+            background-color: #ffffff;
+            touch-action: none;
+        }
+        button {
+            margin-top: 15px;
+            padding: 10px 20px;
             background-color: #4CAF50;
             color: white;
-            font-size: 16px;
             border: none;
             border-radius: 5px;
+            font-size: 16px;
             cursor: pointer;
         }
-        .section-button:hover {
+        button:hover {
             background-color: #45a049;
-        }
-        #vote-confirmation, #total-votes {
-            margin-top: 20px;
-            font-size: 18px;
-        }
-        .submit-button {
-            background-color: #2196F3;
-            padding: 15px 25px;
-            color: white;
-            border: none;
-            font-size: 18px;
-            cursor: pointer;
-            margin-top: 20px;
-        }
-        .submit-button:hover {
-            background-color: #0b7dda;
-        }
-        /* Floating background images */
-        .background-image {
-            position: absolute;
-            opacity: 0.1;
-            width: 200px;
-            height: auto;
-        }
-        .image1 {
-            top: 10%;
-            left: 5%;
-        }
-        .image2 {
-            top: 30%;
-            right: 10%;
-        }
-        .image3 {
-            bottom: 10%;
-            left: 20%;
-        }
-        .image4 {
-            bottom: 20%;
-            right: 5%;
         }
     </style>
 </head>
 <body>
 
-    <h1>Vote for Your Favorite Museum Section</h1>
-
-    <!-- Floating background images -->
-    <img src="modern_art.jpg" class="background-image image1" alt="Modern Art">
-    <img src="fashion_collection.jpg" class="background-image image2" alt="Fashion Collection">
-    <img src="sikh_art.jpg" class="background-image image3" alt="Sikh Art and History">
-    <img src="miniature_rooms.jpg" class="background-image image4" alt="Miniature Rooms">
-
-    <div>
-        <button class="section-button" onclick="vote('Modern Art')">Modern Art</button>
-        <button class="section-button" onclick="vote('Fashion Collection')">Fashion Collection</button>
-        <button class="section-button" onclick="vote('Sikh Art and History')">Sikh Art and History</button>
-        <button class="section-button" onclick="vote('Experimental Art')">Experimental Art</button>
-        <button class="section-button" onclick="vote('Miniature Rooms')">Miniature Rooms</button>
-    </div>
-
-    <div id="vote-confirmation"></div>
-    <div id="total-votes">Total Votes: 0</div>
-
-    <button class="submit-button" onclick="submitVote()">Submit Vote</button>
-
+    <h1>Paint Your Masterpiece!</h1>
+    <canvas id="canvas" width="400" height="400"></canvas>
+    <button onclick="showArtwork()">Compare with Museum Art</button>
+    
     <script>
-        let selectedSection = '';
-        let totalVotes = 0;
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        let painting = false;
 
-        function vote(section) {
-            selectedSection = section;
-            document.getElementById('vote-confirmation').innerHTML = "You selected: " + section;
+        function startPosition(e) {
+            painting = true;
+            draw(e);
         }
 
-        function submitVote() {
-            if (selectedSection === '') {
-                alert('Please select a section before submitting.');
-            } else {
-                totalVotes++;
-                alert('Thank you for voting for the ' + selectedSection + ' section!');
-                document.getElementById('total-votes').innerHTML = 'Total Votes: ' + totalVotes;
-                selectedSection = ''; // Reset selection
-                document.getElementById('vote-confirmation').innerHTML = '';
-            }
+        function endPosition() {
+            painting = false;
+            ctx.beginPath();
+        }
+
+        function draw(e) {
+            if (!painting) return;
+            ctx.lineWidth = 5;
+            ctx.lineCap = 'round';
+            ctx.strokeStyle = '#000000';
+
+            ctx.lineTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(e.clientX - canvas.offsetLeft, e.clientY - canvas.offsetTop);
+        }
+
+        canvas.addEventListener('mousedown', startPosition);
+        canvas.addEventListener('mouseup', endPosition);
+        canvas.addEventListener('mousemove', draw);
+
+        canvas.addEventListener('touchstart', (e) => {
+            startPosition(e.touches[0]);
+        });
+        canvas.addEventListener('touchend', endPosition);
+        canvas.addEventListener('touchmove', (e) => {
+            draw(e.touches[0]);
+        });
+
+        function showArtwork() {
+            alert('Check out this amazing artwork at the Phoenix Art Museum: "Les arceaux fleuris" by Claude Monet!');
+            window.open('https://phxart.org', '_blank');
         }
     </script>
 
